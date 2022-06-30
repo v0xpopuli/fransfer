@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package generated;
+
+option go_package = "/generated";
+
+service FileTransferService {
+  rpc Send (stream FileSendRequest) returns (FileSendResponse) {};
+}
+
+message FileSendRequest {
+  oneof File {
+    string name = 1;
+    bytes chunk = 2;
+  }
+}
+
+message FileSendResponse {}
