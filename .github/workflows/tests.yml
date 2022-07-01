@@ -34,7 +34,7 @@ jobs:
           chmod +x ./scripts/generate-key-pair.sh
           chmod +x ./scripts/generate-proto.sh
           make genkeypair
-          make genproto
+          make genproto -p="`pwd`"
           make tests
           go tool cover -func=coverage.out -o=coverage.out
 
