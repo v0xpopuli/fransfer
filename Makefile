@@ -7,13 +7,14 @@ tests: genmocks
 	go test -v ./... -covermode=count -coverprofile=coverage.out
 
 genproto:
-	docker pull namely/protoc-all
-	docker run -v $p:/defs namely/protoc-all -d ./ -l go -o internal
+ifeq ($(OS), Windows_NT)
+	scripts/generate-proto.sh `pwd -W`/protobuf
+else
+	scripts/generate-proto.sh `pwd`/protobuf
+endif
 
 genkeypair:
-	mkdir -p "configs/keys"
-	openssl genrsa -out configs/keys/rsa 4096
-	openssl rsa -in configs/keys/rsa -pubout -out configs/keys/rsa.pub
+	scripts/generate-key-pair.sh
 
 build-server-for-windows:
 	GOOS=windows GOARCH=386 go build -o ./build/windows/server.exe ./cmd/server

@@ -30,10 +30,12 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Run Test
-        run: |
+        run: |  
+          chmod +x ./scripts/generate-key-pair.sh
+          chmod +x ./scripts/generate-proto.sh
           make genkeypair
-          make genproto -p="`pwd`"
-          make tests
+          make genproto
+          go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
       - name: Go Coverage Badge
