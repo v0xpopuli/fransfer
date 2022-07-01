@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func New(addr string, jwt auth.JWT) Server {
+func New(addr string, jwt auth.JWTVerifier) Server {
 	return server{
 		addr: addr,
 		srv:  grpc.NewServer(WithStreamServerAuthorizationInterceptor(jwt)),

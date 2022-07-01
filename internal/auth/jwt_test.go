@@ -13,7 +13,8 @@ type JWTTestSuite struct {
 
 	privateKeyBytes, publicKeyBytes []byte
 
-	jwt JWT
+	jwtIssuer   JWTIssuer
+	jwtVerifier JWTVerifier
 }
 
 func TestJWTTestSuite(t *testing.T) {
@@ -25,16 +26,19 @@ func (s *JWTTestSuite) SetupSuite() {
 	s.privateKeyBytes, s.publicKeyBytes, err = util.GenerateKeyPair()
 	s.NoError(err)
 
-	s.jwt, err = NewJWT(s.privateKeyBytes, s.publicKeyBytes)
+	s.jwtIssuer, err = NewJWTIssuer(s.privateKeyBytes)
+	s.NoError(err)
+
+	s.jwtVerifier, err = NewJWTVerifier(s.publicKeyBytes)
 	s.NoError(err)
 }
 
 func (s *JWTTestSuite) TestCreateAndValidate() {
-	token, err := s.jwt.CreateWithTTL(1 * time.Minute)
+	token, err := s.jwtIssuer.CreateWithTTL(1 * time.Minute)
 	s.NoError(err)
 	s.NotEmpty(token)
 
-	isValid, err := s.jwt.Validate(token)
+	isValid, err := s.jwtVerifier.Validate(token)
 	s.NoError(err)
 	s.True(isValid)
 }

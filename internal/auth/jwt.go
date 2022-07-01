@@ -18,31 +18,35 @@ var (
 	errTokenInvalid     = errors.New("token invalid")
 )
 
-type JWT struct {
-	privateKey *rsa.PrivateKey
-	publicKey  *rsa.PublicKey
-}
+type (
+	JWTIssuer struct {
+		privateKey *rsa.PrivateKey
+	}
+	JWTVerifier struct {
+		publicKey *rsa.PublicKey
+	}
+)
 
-func NewJWT(privateKey, publicKey []byte) (JWT, error) {
+func NewJWTIssuer(privateKey []byte) (JWTIssuer, error) {
 	prKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
 	if err != nil {
-		return JWT{}, errParsePrivateKey
+		return JWTIssuer{}, errParsePrivateKey
 	}
-	pbKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
-	if err != nil {
-		return JWT{}, errParsePublicKey
-	}
-	return JWT{privateKey: prKey, publicKey: pbKey}, nil
+	return JWTIssuer{privateKey: prKey}, nil
 }
 
-func (j JWT) CreateWithTTL(ttl time.Duration) (string, error) {
+func NewJWTVerifier(publicKey []byte) (JWTVerifier, error) {
+	pbKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
+	if err != nil {
+		return JWTVerifier{}, errParsePublicKey
+	}
+	return JWTVerifier{publicKey: pbKey}, nil
+}
+
+func (j JWTIssuer) CreateWithTTL(ttl time.Duration) (string, error) {
 	now := time.Now().UTC()
 
-	claims := jwt.MapClaims{
-		"iat": now.Unix(),
-		"exp": now.Add(ttl).Unix(),
-	}
-
+	claims := jwt.MapClaims{"iat": now.Unix(), "exp": now.Add(ttl).Unix()}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(j.privateKey)
 	if err != nil {
 		return "", errSignToken
@@ -50,7 +54,7 @@ func (j JWT) CreateWithTTL(ttl time.Duration) (string, error) {
 	return token, nil
 }
 
-func (j JWT) Validate(token string) (bool, error) {
+func (j JWTVerifier) Validate(token string) (bool, error) {
 	tok, err := jwt.Parse(token, j.parseOption)
 	if err != nil {
 		return false, err
@@ -62,7 +66,7 @@ func (j JWT) Validate(token string) (bool, error) {
 	return true, nil
 }
 
-func (j JWT) parseOption(t *jwt.Token) (interface{}, error) {
+func (j JWTVerifier) parseOption(t *jwt.Token) (interface{}, error) {
 	if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 		return nil, errUnexpectedMethod
 	}

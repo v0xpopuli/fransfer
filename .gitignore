@@ -1,6 +1,7 @@
 /fransfer.iml
 /.idea/
 /build/
-/configs/keys/
 /internal/generated/
 /coverage.out
+/cmd/client/key
+/cmd/server/key.pub

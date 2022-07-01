@@ -15,7 +15,7 @@ import (
 type ClientTestSuite struct {
 	suite.Suite
 
-	jwt auth.JWT
+	jwtIssuer auth.JWTIssuer
 
 	name         string
 	content      []byte
@@ -31,16 +31,16 @@ func TestClientTestSuite(t *testing.T) {
 func (s *ClientTestSuite) SetupSuite() {
 	var err error
 
-	privateKeyBytes, publicKeyBytes, err := util.GenerateKeyPair()
+	privateKeyBytes, _, err := util.GenerateKeyPair()
 	s.NoError(err)
 
-	s.jwt, err = auth.NewJWT(privateKeyBytes, publicKeyBytes)
+	s.jwtIssuer, err = auth.NewJWTIssuer(privateKeyBytes)
 	s.NoError(err)
 
 	s.defaultError = errors.New("something went wrong")
 	s.name = "file.txt"
 	s.content = []byte{1, 2, 3}
-	s.client = client{jwt: s.jwt}
+	s.client = client{jwt: s.jwtIssuer}
 }
 
 func (s *ClientTestSuite) TestSend() {

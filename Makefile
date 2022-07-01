@@ -1,20 +1,14 @@
 genmocks:
-	go install github.com/matryer/moq@latest
-	moq -out internal/generated/file_transfer_client_mock.go internal/generated FileTransferClient
-	moq -out internal/generated/file_transfer_send_client_mock.go internal/generated FileTransfer_SendClient
-
-tests: genmocks
-	go test -v ./... -covermode=count -coverprofile=coverage.out
+	scripts/generate-mocks.sh
 
 genproto:
-ifeq ($(OS), Windows_NT)
-	scripts/generate-proto.sh `pwd -W`/protobuf
-else
-	scripts/generate-proto.sh `pwd`/protobuf
-endif
+	scripts/generate-proto.sh
 
 genkeypair:
 	scripts/generate-key-pair.sh
+
+tests:
+	go test -v ./... -covermode=count -coverprofile=coverage.out
 
 build-server-for-windows:
 	GOOS=windows GOARCH=386 go build -o ./build/windows/server.exe ./cmd/server

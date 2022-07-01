@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func WithStreamServerAuthorizationInterceptor(jwt auth.JWT) grpc.ServerOption {
+func WithStreamServerAuthorizationInterceptor(jwt auth.JWTVerifier) grpc.ServerOption {
 	return grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(authorize(jwt)))
 }
 
-func authorize(jwt auth.JWT) grpc_auth.AuthFunc {
+func authorize(jwt auth.JWTVerifier) grpc_auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		token := metautils.ExtractIncoming(ctx).Get(auth.HeaderApiKey)
 

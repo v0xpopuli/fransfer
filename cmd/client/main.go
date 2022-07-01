@@ -16,10 +16,8 @@ import (
 )
 
 var (
-	//go:embed ..\..\configs\keys\rsa
+	//go:embed key
 	privateKey []byte
-	//go:embed ..\..\configs\keys\rsa.pub
-	publicKey []byte
 )
 
 func main() {
@@ -38,7 +36,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	jwt, err := auth.NewJWT(privateKey, publicKey)
+	jwt, err := auth.NewJWTIssuer(privateKey)
 	if err != nil {
 		logrus.Fatal(err)
 	}

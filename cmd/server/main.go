@@ -11,9 +11,7 @@ import (
 )
 
 var (
-	//go:embed ..\..\configs\keys\rsa
-	privateKey []byte
-	//go:embed ..\..\configs\keys\rsa.pub
+	//go:embed key.pub
 	publicKey []byte
 )
 
@@ -27,7 +25,7 @@ func main() {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	jwt, err := auth.NewJWT(privateKey, publicKey)
+	jwt, err := auth.NewJWTVerifier(publicKey)
 	if err != nil {
 		logrus.Fatal(err)
 	}

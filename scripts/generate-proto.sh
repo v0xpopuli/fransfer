@@ -2,7 +2,10 @@
 
 docker pull namely/protoc-all
 
-docker run -v $1:/defs namely/protoc-all -d ./ -l go -o ./
+cp -r protobuf/* scripts/
 
-rm -rf `pwd`/internal/generated
-mv `pwd`/protobuf/generated `pwd`/internal
+docker run -v $(pwd)/protobuf:/defs namely/protoc-all -d ./ -l go -o ./
+
+sudo rm scripts/filetransfer.proto
+sudo mv protobuf/generated/* internal/generated
+sudo rm -rf protobuf/generated

@@ -22,13 +22,13 @@ type (
 	}
 
 	client struct {
-		jwt           auth.JWT
+		jwt           auth.JWTIssuer
 		conn          *grpc.ClientConn
 		serviceClient generated.FileTransferClient
 	}
 )
 
-func NewClient(addr string, jwt auth.JWT) (Client, error) {
+func NewClient(addr string, jwt auth.JWTIssuer) (Client, error) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
