@@ -30,9 +30,11 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Run Test
-        run: |
-          make genproto
+        run: |  
+          chmod +x ./scripts/generate-key-pair.sh
+          chmod +x ./scripts/generate-proto.sh
           make genkeypair
+          make genproto
           go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 

@@ -12,7 +12,7 @@ import (
 
 type (
 	Service interface {
-		generated.FileTransferServiceServer
+		generated.FileTransferServer
 	}
 
 	service struct {
@@ -24,7 +24,7 @@ func NewService(outputDirectory string) Service {
 	return service{outputDirectory: outputDirectory}
 }
 
-func (g service) Send(stream generated.FileTransferService_SendServer) error {
+func (g service) Send(stream generated.FileTransfer_SendServer) error {
 	var (
 		name    string
 		content []byte

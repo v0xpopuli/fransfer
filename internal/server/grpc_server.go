@@ -29,7 +29,7 @@ func New(addr string, jwt auth.JWT) Server {
 }
 
 func (s server) Register(service filetransfer.Service) {
-	generated.RegisterFileTransferServiceServer(s.srv, service)
+	generated.RegisterFileTransferServer(s.srv, service)
 }
 
 func (s server) Run() error {

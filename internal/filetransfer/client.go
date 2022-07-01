@@ -2,14 +2,18 @@ package filetransfer
 
 import (
 	"context"
+	"errors"
 	"fransfer/internal/auth"
 	"fransfer/internal/generated"
 	"path/filepath"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
+
+var ErrOccurredDuringFileSend = errors.New("an error occurred during file send")
 
 type (
 	Client interface {
@@ -20,7 +24,7 @@ type (
 	client struct {
 		jwt           auth.JWT
 		conn          *grpc.ClientConn
-		serviceClient generated.FileTransferServiceClient
+		serviceClient generated.FileTransferClient
 	}
 )
 
@@ -32,7 +36,7 @@ func NewClient(addr string, jwt auth.JWT) (Client, error) {
 	return client{
 		jwt:           jwt,
 		conn:          conn,
-		serviceClient: generated.NewFileTransferServiceClient(conn),
+		serviceClient: generated.NewFileTransferClient(conn),
 	}, nil
 }
 
@@ -48,20 +52,24 @@ func (c client) Send(filePath string, content []byte) error {
 
 	stream, err := c.serviceClient.Send(ctx)
 	if err != nil {
-		return err
+		logrus.WithError(err).Error("Failed to init a stream")
+		return ErrOccurredDuringFileSend
 	}
 
 	if err := stream.Send(c.buildFileSendRequestWithName(filePath)); err != nil {
-		return err
+		logrus.WithError(err).Error("Failed to send file name")
+		return ErrOccurredDuringFileSend
 	}
 	for _, chunk := range c.split(content, 512) {
 		if err := stream.Send(c.buildFileSendRequestWithChunk(chunk)); err != nil {
-			return err
+			logrus.WithError(err).Error("Failed to send file content")
+			return ErrOccurredDuringFileSend
 		}
 	}
 
 	if _, err = stream.CloseAndRecv(); err != nil {
-		return err
+		logrus.WithError(err).Error("Failed to close stream")
+		return ErrOccurredDuringFileSend
 	}
 	return nil
 }

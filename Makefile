@@ -1,6 +1,7 @@
 genmocks:
-	go install github.com/golang/mock/mockgen@latest
-	go generate ./...
+	go install github.com/matryer/moq@latest
+	moq -out internal/generated/file_transfer_client_mock.go internal/generated FileTransferClient
+	moq -out internal/generated/file_transfer_send_client_mock.go internal/generated FileTransfer_SendClient
 
 tests: genmocks
 	go test ./...
