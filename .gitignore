@@ -3,3 +3,4 @@
 /build/
 /configs/keys/
 /internal/generated/
+/coverage.out

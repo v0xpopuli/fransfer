@@ -4,7 +4,7 @@ genmocks:
 	moq -out internal/generated/file_transfer_send_client_mock.go internal/generated FileTransfer_SendClient
 
 tests: genmocks
-	go test ./...
+	go test -v ./... -covermode=count -coverprofile=coverage.out
 
 genproto:
 ifeq ($(OS), Windows_NT)
