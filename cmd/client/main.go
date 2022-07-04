@@ -21,12 +21,13 @@ var (
 )
 
 func main() {
-	address := flag.String("address", "localhost:50051", "where you want file to transfer")
-	filePath := flag.String("file", "", "file you want to transfer")
+	address := flag.String("address", "localhost:50051", "grpc service address")
+	filePath := flag.String("file", "", "path to file you want to transfer")
 	flag.Parse()
 
 	if *filePath == "" {
 		fmt.Println(color.InRed("File can't be empty"))
+		flag.Usage()
 		os.Exit(1)
 	}
 
