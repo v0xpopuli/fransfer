@@ -1,6 +1,7 @@
 package filetransfer
 
 import (
+	"errors"
 	"fransfer/internal/generated"
 	"io"
 	"io/fs"
@@ -8,6 +9,11 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	ErrFileStream = errors.New("error occurred during file stream")
+	ErrFileSave   = errors.New("error occurred during file save")
 )
 
 type (
@@ -24,7 +30,7 @@ func NewService(outputDirectory string) Service {
 	return service{outputDirectory: outputDirectory}
 }
 
-func (g service) Send(stream generated.FileTransfer_SendServer) error {
+func (s service) Send(stream generated.FileTransfer_SendServer) error {
 	var (
 		name    string
 		content []byte
@@ -39,7 +45,7 @@ func (g service) Send(stream generated.FileTransfer_SendServer) error {
 		if err != nil {
 			logrus.WithError(err).WithField("file_name", name).
 				Error("Error occurred during file content streaming")
-			return err
+			return ErrFileStream
 		}
 
 		switch f := req.File.(type) {
@@ -50,12 +56,14 @@ func (g service) Send(stream generated.FileTransfer_SendServer) error {
 		}
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(g.outputDirectory, name), content, fs.ModePerm); err != nil {
-		logrus.WithError(err).WithField("file_name", name).
-			Error("Error occurred during attempt to save file")
-		return err
+	if name != "" && len(content) != 0 {
+		if err := ioutil.WriteFile(filepath.Join(s.outputDirectory, name), content, fs.ModePerm); err != nil {
+			logrus.WithError(err).WithField("file_name", name).
+				Error("Error occurred during attempt to save file")
+			return ErrFileSave
+		}
+		logrus.WithField("file_name", name).Debug("File successfully saved")
 	}
 
-	logrus.WithField("file_name", name).Debug("File successfully saved")
 	return stream.SendAndClose(&generated.FileSendResponse{})
 }
